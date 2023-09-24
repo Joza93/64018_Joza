@@ -1,0 +1,72 @@
+---
+title: "Assignment_2"
+author: "Jay"
+date: "2023-09-24"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Objective: Maximize profit (Z) by determining the production quantities of three product sizes at three plant locations.
+
+# Objective function: Z = 420(L1 + L2 + L3) + 360(M1 + M2 + M3) + 300(S1 + S2 + S3)
+
+# Constraints:
+# 1. Production capacity constraints
+# 2. In-process storage space constraints
+# 3. Sales forecasts constraints
+
+```{r}
+# Load the necessary R library for LP problem solving
+library(lpSolve)
+
+# Define the coefficients of the objective function (profit contributions of each product size)
+profit_contributions <- c(420, 360, 300, 420, 360, 300, 420, 360, 300)
+
+# Define the constraints matrix
+constraints_matrix <- matrix(c(
+  1, 1, 1, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 1, 1, 1, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 1, 1, 1,
+  20, 15, 12, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 20, 15, 12, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 20, 15, 12,
+  1, 0, 0, 1, 0, 0, 1, 0, 0,
+  0, 1, 0, 0, 1, 0, 0, 1, 0,
+  0, 0, 1, 0, 0, 1, 0, 0, 1
+), nrow = 9, byrow = TRUE)
+
+# Define the direction of inequalities (less than or equal to)
+inequality_direction <- c(
+  "<=",
+  "<=",
+  "<=",
+  "<=",
+  "<=",
+  "<=",
+  "<=",
+  "<=",
+  "<="
+)
+
+# Define the right-hand side (RHS) values of the constraints
+rhs_values <- c(
+  750,
+  900,
+  450,
+  13000,
+  12000,
+  5000,
+  900,
+  1200,
+  750
+)
+
+# Solve the LP problem to maximize profit
+lp("max", profit_contributions, constraints_matrix, inequality_direction, rhs_values)
+
+# Retrieve the value of the objective function (maximum profit) and the values of the decision variables (production quantities)
+lp("max", profit_contributions, constraints_matrix, inequality_direction, rhs_values)$solution
+
+
+```
