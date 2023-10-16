@@ -1,0 +1,78 @@
+---
+title: "QMM_Transportation"
+author: "Jay"
+date: "2023-10-13"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r}
+# Load the lpSolve package
+library("lpSolve")
+```
+
+```{r}
+# Define the cost matrix
+cost_matrix <- matrix(c(
+  622, 614, 630, 0,
+  641, 645, 649, 0
+), nrow = 2, byrow = TRUE)
+
+
+# Define the supply and demand vectors
+supply <- c(100, 120)  # Supply constraints for Plant A and Plant B
+demand <- c(80, 60, 70, 10)  # Demand constraints for Warehouse 1, Warehouse 2, Warehouse 3, and the Dummy
+
+```
+
+```{r}
+# Check that the number of supply and demand constraints match
+if (length(supply) != nrow(cost_matrix) || length(demand) != ncol(cost_matrix)) {
+  stop("The number of supply and demand constraints must match the cost matrix dimensions.")
+}
+
+# Solve the transportation problem
+transport_solution <- lp.transport(cost = cost_matrix, direction = "min",
+                                   row.signs = rep(">=", length(supply)),
+                                   row.rhs = supply,
+                                   col.signs = rep("<=", length(demand)),
+                                   col.rhs = demand)
+
+# Extract the solution
+solution <- transport_solution$solution
+
+```
+
+
+```{r}
+
+# Print the solution
+cat("Solution:\n")
+cat("Production at Plant A:", solution[1], "units\n")
+cat("Production at Plant B:", solution[2], "units\n")
+cat("AEDs shipped from Plant A to Warehouse 1:", solution[3], "units\n")
+cat("AEDs shipped from Plant A to Warehouse 2:", solution[4], "units\n")
+cat("AEDs shipped from Plant A to Warehouse 3:", solution[5], "units\n")
+cat("AEDs shipped from Plant B to Warehouse 1:", solution[6], "units\n")
+cat("AEDs shipped from Plant B to Warehouse 2:", solution[7], "units\n")
+cat("AEDs shipped from Plant B to Warehouse 3:", solution[8], "units\n")
+```
+
+
+```{r}
+# Print the total cost
+cat("Optimal Cost:", transport_solution$objval, "\n")
+```
+
+#Summary
+
+#In this problem, two factories, Plant A and Plant B, produce automated external defibrillators (AEDs) at different costs and capacities.These AEDs need to be distributed to three warehouses (Warehouse 1, Warehouse 2, and Warehouse 3), each with its monthly demand. The goal is to minimize the combined cost of production and shipping.
+
+#The script sets up the problem by defining the cost matrix, supply constraints for the plants, and demand constraints for the warehouses, including a dummy constraint. It ensures that the constraints align with the dimensions of the cost matrix.
+
+#Using the "lp.transport" function, the script finds the optimal solution. This solution includes how many AEDs to produce at each plant and how to distribute them to each warehouse. It also provides the minimum cost of transportation.
+
+#In essence, this script is a practical tool for solving complex transportation problems efficiently. It ensures that the production and distribution of goods are optimized while considering various constraints.
+
