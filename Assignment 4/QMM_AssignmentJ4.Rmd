@@ -1,0 +1,88 @@
+---
+title: "QMM_Assignment4"
+author: "Jay"
+date: "2023-11-10"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+*Problem: AP, a shipping service ensuring overnight package delivery throughout the continental US, manages hubs in key cities and airports nationwide. These hubs receive packages, which are then dispatched either to intermediate hubs or directly to their final destinations. The manager of the Cleveland hub is actively addressing concerns related to labor costs. The objective is to optimize worker scheduling for the hub, which functions every day of the week, adapting to the variable daily package loads.*
+
+```{r setup, include=FALSE}
+
+library("lpSolveAPI")
+
+knitr::opts_chunk$set(echo = TRUE)
+
+# Set the working directory for the entire notebook
+knitr::opts_knit$set(root.dir = '/Users/jay/Downloads')
+```
+
+```{r}
+# Read the LP file
+df <- read.lp("pro.lp")
+print(df)
+
+```
+
+```{r}
+# Number of workers required each day
+Workers_Per_Day <- matrix(c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",
+                            18,27,22,26,25,21,19), ncol=2, byrow=FALSE)
+colnames(Workers_Per_Day) <- c("Day_of_the_week", "Workers_Required")
+as.table(Workers_Per_Day)
+```
+*AP's package handlers enjoy a standard five-day work week with two consecutive days off. Their base wage is set at $750 per week. For those who work on either Saturday or Sunday, there is an additional $25 per day. The available shifts and corresponding salaries for package handlers are as follows:*
+```{r}
+# Possible shifts and wages
+Shifts_and_wages <- matrix(c(1,2,3,4,5,6,7,
+                             "Sunday and Monday","Monday and Tuesday","Tuesday and Wednesday",
+                             "Wednesday and Thursday","Thursday and Friday",
+                             "Friday and Saturday","Saturday and Sunday", "$775",
+                             "$800","$800","$800","$800","$775","$750"), ncol=3, byrow=FALSE)
+colnames(Shifts_and_wages) <- c("Shift", "Days_Off", "Wage")
+as.table(Shifts_and_wages)
+
+```
+
+```{r}
+# Solve the lp model
+solve(df)
+```
+
+**Acknowledging that a valid model results in obtaining a value of 0.*    
+
+```{r}
+# Total Cost - Objective Function
+total_cost <- get.objective(df)
+total_cost
+```
+*The total cost amounts to $25,675. This represents the overall cost for the company to ensure an adequate workforce daily while minimizing the total labor expenses.*
+
+```{r}
+# Number of workers available each day - variable
+workers_available <- get.variables(df)
+workers_available
+```
+
+```{r}
+# Summary of workers available each day
+cat("Summary of Workers Available Each Day:\n")
+cat("Monday =", workers_available[3] + workers_available[4] + workers_available[5] + workers_available[6] + workers_available[7], "Workers\n")
+cat("Tuesday =", workers_available[4] + workers_available[5] + workers_available[6] + workers_available[7] + workers_available[1], "Workers\n")
+cat("Wednesday =", workers_available[5] + workers_available[6] + workers_available[7] + workers_available[1] + workers_available[2], "Workers\n")
+cat("Thursday =", workers_available[6] + workers_available[7] + workers_available[1] + workers_available[2] + workers_available[3], "Workers\n")
+cat("Friday =", workers_available[7] + workers_available[1] + workers_available[2] + workers_available[3] + workers_available[4], "Workers\n")
+cat("Saturday =", workers_available[1] + workers_available[2] + workers_available[3] + workers_available[4] + workers_available[5], "Workers\n")
+cat("Sunday =", workers_available[2] + workers_available[3] + workers_available[4] + workers_available[5] + workers_available[6], "Workers\n")
+```
+
+
+
+
+
+
+
+
